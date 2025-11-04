@@ -1,0 +1,2 @@
+Kondoo es un framework de chatbot que funciona 100% local con Ollama.
+Kondoo es cien por ciento open source mexicano.

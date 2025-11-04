@@ -1,0 +1,32 @@
+# kondoo/pyproject.toml
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kondoo"
+version = "0.1.0"
+description = "A flexible, self-hosted RAG chatbot framework for containerized deployments."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "LICENSE" }
+
+dependencies = [
+    "flask",
+    "python-dotenv",
+    "google-generativeai",
+    "llama-index",
+    "llama-index-llms-gemini",
+    "llama-index-llms-openai",
+    "llama-index-llms-openai-like",
+    "llama-index-embeddings-ollama",
+    "llama-index-embeddings-huggingface",
+    "llama-index-embeddings-openai"
+]
+
+[project.urls]
+Homepage = "httpsIA-placeholder-url.com"  # Reemplaza con tu URL de GitHub cuando esté lista
+Repository = "httpsIA-placeholder-url.com"
+
+[tool.setuptools.packages.find]
+where = ["src"]  # Busca paquetes dentro del directorio 'src'

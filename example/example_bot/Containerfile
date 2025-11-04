@@ -1,0 +1,29 @@
+FROM python:3.11-slim as builder
+WORKDIR /build
+
+COPY ../../pyproject.toml .
+COPY ../../src/ ./src/
+
+COPY ../../README.md .
+COPY ../../LICENSE .
+
+RUN pip install --upgrade pip build
+RUN python -m build
+
+
+
+
+
+FROM python:3.11-slim
+WORKDIR /app
+
+RUN pip install --upgrade pip
+
+COPY --from=builder /build/dist/*.whl .
+
+RUN pip install kondoo-*.whl && rm kondoo-*.whl
+
+COPY ./example/example_bot/personality.txt /app/personality.txt
+
+EXPOSE 5000
+CMD ["python", "-m", "kondoo.app"]

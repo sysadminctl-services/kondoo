@@ -1,0 +1,23 @@
+# examples/example-bot/compose.yaml
+version: '3.8'
+
+services:
+
+  rag-bot:
+    build:
+      context: ../../
+      dockerfile: ./example/example_bot/Containerfile
+    container_name: example-bot
+    restart: unless-stopped
+    networks:
+      - kondoo-net
+    env_file:
+      - ./.env
+    volumes:
+      - ./knowledge:/app/knowledge:z
+    ports:
+      - "5000:5000"
+
+networks:
+  kondoo-net:
+    driver: bridge
