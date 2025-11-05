@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kondoo"
-version = "0.1.1"
+version = "0.1.2"
 description = "A flexible, self-hosted RAG chatbot framework for containerized deployments."
 readme = "README.md"
 requires-python = ">=3.9"
