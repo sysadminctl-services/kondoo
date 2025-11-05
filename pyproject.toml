@@ -25,8 +25,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "httpsIA-placeholder-url.com"  # Reemplaza con tu URL de GitHub cuando esté lista
-Repository = "httpsIA-placeholder-url.com"
+Homepage = "https://github.com/sysadminctl-services/kondoo"
+Repository = "https://github.com/sysadminctl-services/kondoo"
 
 [tool.setuptools.packages.find]
 where = ["src"]  # Busca paquetes dentro del directorio 'src'
