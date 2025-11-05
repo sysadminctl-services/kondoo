@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kondoo"
-version = "0.1.5"
+version = "0.1.6"
 authors = [
   { name="Luis Pereida", email="luis.pereida@sysadminctl.services" },
 ]
@@ -12,6 +12,12 @@ description = "A flexible, self-hosted RAG chatbot framework for containerized d
 readme = "README.md"
 requires-python = ">=3.9"
 license = { file = "LICENSE" }
+
+keywords = [
+    "chatbot", "rag", "llm", "ollama", "gemini", "self-hosted", 
+    "docker", "podman", "container", "framework", "python", 
+    "flask", "llama-index"
+]
 
 dependencies = [
     "flask",
@@ -43,7 +49,7 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/sysadminctl-services/kondoo"
 Repository = "https://github.com/sysadminctl-services/kondoo"
-Bug Tracker = "https://github.com/sysadminctl-services/kondoo/issues"
+"Bug Tracker" = "https://github.com/sysadminctl-services/kondoo/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
