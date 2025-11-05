@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kondoo"
-version = "0.1.4"
+version = "0.1.5"
 authors = [
   { name="Luis Pereida", email="luis.pereida@sysadminctl.services" },
 ]
@@ -26,7 +26,7 @@ dependencies = [
     "llama-index-embeddings-openai"
 ]
 
-[project.classifiers] = [
+classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
