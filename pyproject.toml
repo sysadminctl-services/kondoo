@@ -1,15 +1,17 @@
-# kondoo/pyproject.toml
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "kondoo"
-version = "0.1.2"
+version = "0.1.3"
+authors = [
+  { name="Luis Pereida", email="luis.pereida@sysadminctl.services" },
+]
 description = "A flexible, self-hosted RAG chatbot framework for containerized deployments."
 readme = "README.md"
 requires-python = ">=3.9"
-license = { text = "LICENSE" }
+license = { file = "LICENSE" }
 
 dependencies = [
     "flask",
@@ -24,9 +26,23 @@ dependencies = [
     "llama-index-embeddings-openai"
 ]
 
+[project.classifiers]
+Development Status :: 3 - Alpha
+Intended Audience :: Developers
+Topic :: Scientific/Engineering :: Artificial Intelligence
+Topic :: Software Development :: Libraries :: Python Modules
+Topic :: Communications :: Chat
+License :: OSI Approved :: MIT License
+Programming Language :: Python :: 3
+Programming Language :: Python :: 3.9
+Programming Language :: Python :: 3.10
+Programming Language :: Python :: 3.11
+Operating System :: OS Independent
+
 [project.urls]
 Homepage = "https://github.com/sysadminctl-services/kondoo"
 Repository = "https://github.com/sysadminctl-services/kondoo"
+Bug Tracker = "https://github.com/sysadminctl-services/kondoo/issues"
 
 [tool.setuptools.packages.find]
-where = ["src"]  # Busca paquetes dentro del directorio 'src'
+where = ["src"]
