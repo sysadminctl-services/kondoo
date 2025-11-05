@@ -148,7 +148,29 @@ def process_query():
     logging.info(f"Received query: '{user_query}'")
 
     try:
+        # 1. Obtenemos la respuesta completa
         response = query_engine.query(user_query)
+        
+        # --- CÓDIGO DE LOGGING DE CONTEXTO ---
+        logging.info("--- Context Chunks Retrieved for Query ---")
+        if response.source_nodes:
+            for i, node in enumerate(response.source_nodes):
+                logging.info(f"Chunk {i+1} (Score: {node.score:.4f}):")
+
+                # --- ¡AQUÍ ESTÁ LA CORRECCIÓN! ---
+                # 1. Primero, hacemos el replace() y lo guardamos en una variable.
+                cleaned_text = node.text.replace('\n', ' ')
+                
+                # 2. Ahora, el f-string usa la variable limpia (sin backslash).
+                logging.info(f"'{cleaned_text}'")
+                # --- FIN DE LA CORRECCIÓN ---
+
+                logging.info("----------------------------------")
+        else:
+            logging.info("No context chunks were retrieved.")
+        # --- FIN DEL CÓDIGO DE LOGGING ---
+
+        # 3. Extraemos el texto de la respuesta para el usuario
         response_text = str(response)
         logging.info(f"Generated response: '{response_text}'")
         return jsonify({"response": response_text})
