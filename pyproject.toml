@@ -4,9 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kondoo"
-version = "0.1.6"
+version = "0.1.7"
 authors = [
   { name="Luis Pereida", email="luis.pereida@sysadminctl.services" },
+  { name="Haydee Padilla", email="haydee.padilla@sysadminctl.services" },
 ]
 description = "A flexible, self-hosted RAG chatbot framework for containerized deployments."
 readme = "README.md"
