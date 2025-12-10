@@ -13,8 +13,8 @@ This project was born with a **“self-hosted first”** philosophy, giving you 
 * **Framework Agnostic:** Not tied to a specific provider. Use an `ANSWER_LLM_PROVIDER` to choose your answer engine (Gemini, OpenAI, Ollama) and a `KNOWLEDGE_PROVIDER` for your embeddings (Ollama, local, OpenAI).
 * **Containerized by Design:** Built on **Podman** and `compose`, ensuring maximum portability and clean, repeatable deployment.
 * **Self-Hosted First:** Designed to run 100% locally, using Ollama for both embeddings and response generation, giving you full control and privacy.
-* **Flexible:** Easily configure each bot's personality through a simple `personality.txt` file.
 * **Extensible:** The `src/` structure makes it an installable Python package, ready to be imported into larger projects.
+* **Decoupled Identity:** Separates the bot's identity (persona.yaml) from its behavioral rules (behavior.txt), allowing for scalable management of multiple bots with standardized service quality.
 
 ## 🏛️ Project Structure
 
@@ -34,7 +34,7 @@ Try Kondoo in 5 minutes using the sample bot.
 * [Podman](https://podman.io/) and `podman-compose`.
 * [Python 3.9+](https://www.python.org/)
 * Your own Ollama service (local or remote) or an API Key (e.g., Google Gemini).
-* [SynapsIA](https://github.com/sysadminctl-services/synapsia) to create the knowledge base.
+* [SynapsIA](https://pypi.org/project/synapsia/) to create the knowledge base.
 
 ### 2. Clone the Repository
 
@@ -44,19 +44,13 @@ cd kondoo
 ```
 
 ### 3. Set Up the Example Bot
-Navigate to the example directory:
+Copy the configuration template to the example bot directory:
 
 ```bash
-cd example/example_bot
+cp .env.example example/example_bot/.env
 ```
 
-Create your personal configuration file from the root template:
-
-```bash
-cp ../../.env.example .env
-```
-
-Edit the .env file and fill in the variables. For a 100% local test with Ollama:
+Edit the `.env` file and fill in the variables. For a 100% local test with Ollama:
 
 ```Ini, TOML
 # example/example_bot/.env
@@ -65,10 +59,12 @@ KNOWLEDGE_PROVIDER=ollama
 
 LLM_MODEL_NAME="tinyllama"
 LLM_BASE_URL="http://host.containers.internal:11434/v1"
-LLM_API_KEY="ollama"
 
 EMBEDDING_MODEL_NAME="mxbai-embed-large"
 OLLAMA_BASE_URL="http://host.containers.internal:11434"
+
+BOT_PERSONA_FILE=/app/persona.yaml
+BOT_BEHAVIOR_FILE=/app/behavior.txt
 ```
 
 ### 4. Create the Knowledge Base
@@ -76,15 +72,23 @@ OLLAMA_BASE_URL="http://host.containers.internal:11434"
 Create the directories for the documents and the knowledge base:
 
 ```bash
-mkdir docs
-mkdir knowledge
-echo “Kondoo is a RAG chatbot framework.” > docs/info.txt
+cd example/example_bot
+mkdir -p docs knowledge
 ```
 
-Use [SynapsIA](https://github.com/sysadminctl-services/synapsia) to process your documents:
+1. Define Identity: Edit `persona.yaml` to define the bot's name and role.
+
+2. Define Behavior: Edit `behavior.txt` to set the interaction rules.
+
+3. Create Documents: Add your source files to the `docs/` folder.
 
 ```bash
-python synapsia.py --docs ../Kondoo/example/example_bot/docs/ --knowledge ../Kondoo/example/example_bot/knowledge/
+echo "Kondoo is a RAG chatbot framework created by sysadminctl.services." > docs/info.txt
+```
+4. Ingest Knowledge: Use the installed synapsia command:
+
+```bash
+synapsia --docs ./docs/ --knowledge ./knowledge/
 ```
 
 ### 5. Launch the Container
@@ -101,8 +105,8 @@ Open a new terminal and send a query using curl:
 
 ```bash
 curl -X POST \
-  -H “Content-Type: application/json” \
-  -d ‘{“query”: “What is Kondoo?”}’ \
+  -H "Content-Type: application/json" \
+  -d '{"query": "What is Kondoo?"}' \
   http://localhost:5000/query
 ```
 
@@ -162,12 +166,15 @@ These are the "control knobs" required by the providers you selected above.
 
 These variables control the bot's identity and data paths.
 
-* `BOT_PERSONALITY_FILE`:
-    * **Description:** The path *inside the container* to the text file that defines the bot's personality.
-    * **Default:** `/app/personality.txt` (as set by the `Containerfile`).
+* `BOT_PERSONA_FILE`:
+    * **Description:** Path to the YAML file defining the specific identity (Name, Role, Tone).
+    * **Default:** `/app/persona.yaml`.
+* `BOT_BEHAVIOR_FILE`:
+    * **Description:** Path to the TXT or Markdown file defining global interaction rules.
+    * **Default:** `/app/behavior.txt`.
 * `KNOWLEDGE_DIR`:
-    * **Description:** The path *inside the container* where the bot will load its knowledge base from.
-    * **Default:** `/app/knowledge` (as set by the `compose.yaml` volume).
+    * **Description:** The path where the bot will load its knowledge base from.
+    * **Default:** `/app/knowledge`.
 
 ## ⚖️ License
 This project is licensed under the MIT License. See the LICENSE file for more details.

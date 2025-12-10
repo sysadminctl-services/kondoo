@@ -15,6 +15,9 @@ services:
       - ./.env
     volumes:
       - ./knowledge:/app/knowledge:z
+      - ./persona.yaml:/app/persona.yaml:z
+      - ./behavior.txt:/app/behavior.txt:z
+      
     ports:
       - "5000:5000"
 
