@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kondoo"
-version = "0.1.8"
+version = "0.1.9"
 authors = [
   { name="Luis Pereida", email="luis.pereida@sysadminctl.services" },
   { name="Haydee Padilla", email="haydee.padilla@sysadminctl.services" },
@@ -22,6 +22,7 @@ keywords = [
 
 dependencies = [
     "flask",
+    "flask-cors",
     "python-dotenv",
     "google-generativeai",
     "llama-index",

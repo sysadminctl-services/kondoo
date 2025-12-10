@@ -3,6 +3,7 @@ import os
 import logging
 import yaml
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 from llama_index.core import (
     VectorStoreIndex,
@@ -25,6 +26,19 @@ from llama_index.embeddings.openai import OpenAIEmbedding
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__)
+
+cors_env = os.environ.get('CORS_ALLOWED_ORIGINS', '*')
+
+if cors_env == '*':
+    cors_origins = '*'
+    logging.warning("⚠️ CORS configurado para permitir TODO (*). Revisa tu .env en producción.")
+else:
+    cors_origins = [origin.strip() for origin in cors_env.split(',')]
+    logging.info(f"🛡️ CORS habilitado solo para: {cors_origins}")
+
+# Aplicamos la configuración
+CORS(app, origins=cors_origins)
+
 query_engine = None
 
 # --- SYSTEM PROMPT BUILDER ---
