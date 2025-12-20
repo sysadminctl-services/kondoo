@@ -12,6 +12,7 @@ from llama_index.core import (
     Settings,
     PromptTemplate
 )
+from llama_index.core.memory import ChatMemoryBuffer
 
 # --- Provider-specific imports ---
 from llama_index.llms.gemini import Gemini
@@ -39,7 +40,13 @@ else:
 # Aplicamos la configuración
 CORS(app, origins=cors_origins)
 
+CORS(app, origins=cors_origins)
+
+# Global State
 query_engine = None
+index_storage = None # To hold the loaded index
+session_store = {} # { 'session_id': ChatMemoryBuffer }
+
 
 # --- SYSTEM PROMPT BUILDER ---
 def build_system_prompt(persona_path, behavior_path):
@@ -82,7 +89,8 @@ def build_system_prompt(persona_path, behavior_path):
     return final_system_prompt
 
 def initialize_query_engine():
-    global query_engine
+    global query_engine, index_storage
+
 
     try:
         # --- 0. PRE-LOAD CONFIGURATION VARIABLES (With Defaults) ---
@@ -167,7 +175,7 @@ def initialize_query_engine():
         
         logging.info(f"Loading vectors...") # Mensaje simplificado porque ya lo dijimos arriba
         storage_context = StorageContext.from_defaults(persist_dir=knowledge_dir)
-        index = load_index_from_storage(storage_context)
+        index_storage = load_index_from_storage(storage_context)
         
         # --- 5. BUILD THE NEW PROMPT ---
         logging.info("Constructing Brain...")
@@ -184,8 +192,8 @@ def initialize_query_engine():
         )
         qa_template = PromptTemplate(qa_template_str)
 
-        # --- 6. Create Query Engine ---
-        query_engine = index.as_query_engine(
+        # --- 6. Create Query Engine (Default for stateless requests) ---
+        query_engine = index_storage.as_query_engine(
             streaming=False,
             text_qa_template=qa_template,
             similarity_top_k=rag_top_k
@@ -209,13 +217,61 @@ def process_query():
 
     data = request.get_json()
     user_query = data.get("query")
+    session_id = data.get("session_id") # Optional: For chat history
+
     if not user_query:
         return jsonify({"error": "Missing query"}), 400
 
-    logging.info(f"Query: '{user_query}'")
+    logging.info(f"Query: '{user_query}' | Session: {session_id if session_id else 'None'}")
 
     try:
-        response = query_engine.query(user_query)
+        # --- LOGIC SELECTION: CHAT (Stateful) vs QUERY (Stateless) ---
+        if session_id:
+            # 1. Get or Create Memory
+            if session_id not in session_store:
+                logging.info(f"Creating new memory buffer for session: {session_id}")
+                session_store[session_id] = ChatMemoryBuffer.from_defaults(token_limit=3000)
+            
+            user_memory = session_store[session_id]
+
+            # 2. Create Chat Engine for this request
+            # We use 'context' mode to mix RAG with history
+            chat_engine = index_storage.as_chat_engine(
+                chat_mode="context",
+                memory=user_memory,
+                system_prompt=query_engine.get_prompts()['response_synthesizer:text_qa_template_obj'].kwargs.get('context_str', ''), # Reuse prompt logic if possible or simplify
+                # Note: LlamaIndex chat_engine 'context' mode usually handles the system prompt differently.
+                # Let's simplify and re-build the prompt for the chat engine or pass the existing system prompt.
+                # Simplification: The build_system_prompt returns a string we can use.
+            )
+            
+            # Re-fetch config to ensure consistency using the global helper or just reuse the logic?
+            # Better approach: initialize_query_engine already set up the LLM in Settings.
+            
+            # Custom System Prompt for Chat
+            # We need to re-read the files or store the prompt string globally. 
+            # Optimization: Let's accept that we might re-read or we can store 'full_system_prompt' globally.
+            # For now, let's rely on LlamaIndex defaults + context, but we want the Persona.
+            
+            # Let's grab the prompt from the current query_engine to avoid re-reading files? 
+            # Or just re-build it since files are small. Let's call build_system_prompt again for safety/simplicity
+            persona_file = os.environ.get('BOT_PERSONA_FILE', '/app/config/persona.yaml')
+            behavior_file = os.environ.get('BOT_BEHAVIOR_FILE', '/app/config/behavior.txt')
+            chat_system_prompt = build_system_prompt(persona_file, behavior_file)
+
+            # Re-init engine with correct prompt
+            chat_engine = index_storage.as_chat_engine(
+                chat_mode="context",
+                memory=user_memory,
+                system_prompt=chat_system_prompt,
+                similarity_top_k=int(os.environ.get('RAG_TOP_K', '2'))
+            )
+            
+            response = chat_engine.chat(user_query)
+        
+        else:
+            # Stateless (Legacy)
+            response = query_engine.query(user_query)
         
         # Context Logging
         logging.info("--- Context Chunks ---")
