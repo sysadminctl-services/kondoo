@@ -162,7 +162,22 @@ These are the "control knobs" required by the providers you selected above.
 
 ---
 
-### 3. Bot Configuration
+---
+
+### 3. Fine Tuning
+
+Customize the bot's creativity and retrieval precision.
+
+* `LLM_TEMPERATURE`:
+    * **Description:** Controls the randomness of the model. `0.0` is deterministic (good for data extraction), `1.0` is creative.
+    * **Default:** `0.1`
+* `RAG_TOP_K`:
+    * **Description:** Number of text chunks to retrieve from the knowledge base for each query.
+    * **Default:** `2`
+
+---
+
+### 4. Bot Configuration
 
 These variables control the bot's identity and data paths.
 

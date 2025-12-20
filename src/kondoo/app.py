@@ -98,7 +98,14 @@ def initialize_query_engine():
 
         knowledge_provider = os.environ.get('KNOWLEDGE_PROVIDER', 'ollama').lower()
         embed_model_name = os.environ.get('EMBEDDING_MODEL_NAME', 'Not Set')
+        embed_model_name = os.environ.get('EMBEDDING_MODEL_NAME', 'Not Set')
         ollama_base_url = os.environ.get('OLLAMA_BASE_URL', 'http://ollama:11434')
+
+        # --- New Configuration: Temperature & Top-K ---
+        # Default Temperature: 0.1 (Focused)
+        llm_temperature = float(os.environ.get('LLM_TEMPERATURE', '0.1'))
+        # Default Top-K: 2 (Standard context window)
+        rag_top_k = int(os.environ.get('RAG_TOP_K', '2'))
 
         knowledge_dir = os.environ.get('KNOWLEDGE_DIR', '/app/knowledge')
         persona_file = os.environ.get('BOT_PERSONA_FILE', '/app/config/persona.yaml')
@@ -121,6 +128,10 @@ def initialize_query_engine():
         logging.info(f"     • Vector Dir:    {knowledge_dir}")
         if knowledge_provider == 'ollama':
             logging.info(f"     • Ollama URL:    {ollama_base_url}")
+        
+        logging.info(f"\n ⚙️  FINE TUNING:")
+        logging.info(f"     • Temperature:   {llm_temperature}")
+        logging.info(f"     • Top-K:         {rag_top_k}")
 
         logging.info(f"\n 🎭  BOT IDENTITY:")
         logging.info(f"     • Persona File:  {persona_file}")
@@ -131,14 +142,14 @@ def initialize_query_engine():
         # Ahora usamos las variables que ya cargamos arriba
         if llm_provider == 'gemini':
             if not raw_api_key: raise ValueError("LLM_API_KEY needed for Gemini.")
-            Settings.llm = Gemini(api_key=raw_api_key, model_name=llm_model_name)
+            Settings.llm = Gemini(api_key=raw_api_key, model_name=llm_model_name, temperature=llm_temperature)
         elif llm_provider == 'openai':
             if not raw_api_key: raise ValueError("LLM_API_KEY needed for OpenAI.")
-            Settings.llm = OpenAI(api_key=raw_api_key, model=llm_model_name)
+            Settings.llm = OpenAI(api_key=raw_api_key, model=llm_model_name, temperature=llm_temperature)
         elif llm_provider == 'ollama_compatible':
             if not llm_base_url or llm_base_url == 'N/A': raise ValueError("LLM_BASE_URL is required for ollama_compatible.")
             # Nota: pasamos 'ollama' como api_key dummy si no hay una real, para que el cliente no se queje
-            Settings.llm = OpenAILike(model=llm_model_name, api_base=llm_base_url, api_key=raw_api_key or 'ollama', is_chat_model=True)
+            Settings.llm = OpenAILike(model=llm_model_name, api_base=llm_base_url, api_key=raw_api_key or 'ollama', is_chat_model=True, temperature=llm_temperature)
         else:
             raise ValueError(f"Unsupported provider: {llm_provider}")
 
@@ -176,7 +187,8 @@ def initialize_query_engine():
         # --- 6. Create Query Engine ---
         query_engine = index.as_query_engine(
             streaming=False,
-            text_qa_template=qa_template
+            text_qa_template=qa_template,
+            similarity_top_k=rag_top_k
         )
         logging.info("✅ Kondoo Engine initialized successfully!")
         return True
