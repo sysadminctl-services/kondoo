@@ -15,7 +15,7 @@ from llama_index.core import (
 from llama_index.core.memory import ChatMemoryBuffer
 
 # --- Provider-specific imports ---
-from llama_index.llms.gemini import Gemini
+from llama_index.llms.google_genai import GoogleGenAI
 from llama_index.llms.openai import OpenAI
 from llama_index.llms.openai_like import OpenAILike
 
@@ -150,7 +150,7 @@ def initialize_query_engine():
         # Ahora usamos las variables que ya cargamos arriba
         if llm_provider == 'gemini':
             if not raw_api_key: raise ValueError("LLM_API_KEY needed for Gemini.")
-            Settings.llm = Gemini(api_key=raw_api_key, model_name=llm_model_name, temperature=llm_temperature)
+            Settings.llm = GoogleGenAI(api_key=raw_api_key, model_name=llm_model_name, temperature=llm_temperature)
         elif llm_provider == 'openai':
             if not raw_api_key: raise ValueError("LLM_API_KEY needed for OpenAI.")
             Settings.llm = OpenAI(api_key=raw_api_key, model=llm_model_name, temperature=llm_temperature)
@@ -236,15 +236,6 @@ def process_query():
 
             # 2. Create Chat Engine for this request
             # We use 'context' mode to mix RAG with history
-            chat_engine = index_storage.as_chat_engine(
-                chat_mode="context",
-                memory=user_memory,
-                system_prompt=query_engine.get_prompts()['response_synthesizer:text_qa_template_obj'].kwargs.get('context_str', ''), # Reuse prompt logic if possible or simplify
-                # Note: LlamaIndex chat_engine 'context' mode usually handles the system prompt differently.
-                # Let's simplify and re-build the prompt for the chat engine or pass the existing system prompt.
-                # Simplification: The build_system_prompt returns a string we can use.
-            )
-            
             # Re-fetch config to ensure consistency using the global helper or just reuse the logic?
             # Better approach: initialize_query_engine already set up the LLM in Settings.
             
@@ -260,8 +251,10 @@ def process_query():
             chat_system_prompt = build_system_prompt(persona_file, behavior_file)
 
             # Re-init engine with correct prompt
+            # We use 'condense_plus_context' mode which is better for maintaining conversation history
+            # It condenses the conversation history and the latest question into a standalone question
             chat_engine = index_storage.as_chat_engine(
-                chat_mode="context",
+                chat_mode="condense_plus_context",
                 memory=user_memory,
                 system_prompt=chat_system_prompt,
                 similarity_top_k=int(os.environ.get('RAG_TOP_K', '2'))

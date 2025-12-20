@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kondoo"
-version = "0.1.10"
+version = "0.1.11"
 authors = [
   { name="Luis Pereida", email="luis.pereida@sysadminctl.services" },
   { name="Haydee Padilla", email="haydee.padilla@sysadminctl.services" },
@@ -26,13 +26,14 @@ dependencies = [
     "python-dotenv",
     "google-generativeai",
     "llama-index",
-    "llama-index-llms-gemini",
+    "llama-index-llms-google-genai",
     "llama-index-llms-openai",
     "llama-index-llms-openai-like",
     "llama-index-embeddings-ollama",
     "llama-index-embeddings-huggingface",
     "llama-index-embeddings-openai",
-    "pyyaml"
+    "pyyaml",
+    "gunicorn"
 ]
 
 classifiers = [
